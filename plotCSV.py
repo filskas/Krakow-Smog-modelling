@@ -14,8 +14,8 @@ def toarray(file):
     return np.array(DATA)
 
 if __name__ == '__main__':
-    file = open('testPradnik.csv', "r")
-    # file = open('testCentrum.csv', "r")
+    # file = open('testPradnik.csv', "r")
+    file = open('testCentrum.csv', "r")
     DATA = toarray(file)
     plt.imshow(DATA, cmap='cool', interpolation='nearest')
     plt.title("2-D Heat Map")
