@@ -46,9 +46,15 @@ def readtable(name):
 
     DATA = toarray(file, rows, noData,newNoData)
     print(len(DATA))
-    DATA = reduce(DATA, 8, rows, cols) #redukuje np 4*4 kwadratów do jednego np. komorke 0.5x0.5 -> 2x2
+    DATA = reduce(DATA, 32, rows, cols) #redukuje np 4*4 kwadratów do jednego np. komorke 0.5x0.5 -> 2x2
+    name = name.replace("/terrainmodelKrakowSample","")
+    name = name.replace(".asc","")
+    name = name[19:]+".csv"
+    print(name)
     np.savetxt(
-        "testPradnik.csv",
+        # "testPradnik.csv",
+        # "testCentrum.csv",
+        name,
         DATA,
         delimiter=';',
         newline='\n',
@@ -61,5 +67,8 @@ def readtable(name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    # readtable('67255_783018_M-34-64-D-d-1-2.asc')
-    readtable('67255_783003_M-34-64-D-b-4-3.asc')
+    # readtable('DATA/67255_783018_M-34-64-D-d-1-2.asc')
+    # readtable('DATA/67255_783003_M-34-64-D-b-4-3.asc')
+    readtable('DATA/67255_783032_M-34-64-D-d-4-4.asc')
+    readtable('DATA/67255_783031_M-34-64-D-d-4-3.asc')
+    pass
