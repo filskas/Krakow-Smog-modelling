@@ -17,9 +17,9 @@ class Cell:
 
     def draw(self):
         if self.type == -1:
-            return [255,255,255]
+            return 0
         else:
-            return [0,0,0]
+            return 1
 
 
 
@@ -33,9 +33,9 @@ class Layer:
         arr = np.asarray(list)
         print("shape",arr.shape)
         print(arr)
-        out = im.fromarray(arr, "RGB")
+        #out = im.fromarray(arr, "L")
         #out.show()
-        return out
+        return arr
     def wallCells(self):
         sum=0
         for _ in self.cells:
