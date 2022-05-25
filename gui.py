@@ -5,6 +5,7 @@ from PIL import Image as im
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import plotCSV
+import mergemap
 
 class Cell:
     # type ->
@@ -64,10 +65,13 @@ def gui():
     root.mainloop()
 
 
-file = open('testPradnik.csv', "r")
-# file = open('testCentrum.csv', "r")
-DATA = plotCSV.toarray(file)
-file.close()
+# file = open('testPradnik.csv', "r")
+# # file = open('testCentrum.csv', "r")
+# DATA = plotCSV.toarray(file)
+# file.close()
+
+DATA = mergemap.createFullMap()
+
 print(DATA.shape)
 map = createMap(DATA,np.amin(DATA),np.amax(DATA),4)
 for m in map:
