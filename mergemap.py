@@ -20,7 +20,7 @@ def createFullMap():
         testrow = []
         for j in range(len(grid[0])):
             name = ''
-            for file in os.listdir("./terrainmodelKrakowSample/DATA"):
+            for file in os.listdir(os.getcwd()):
                 if file[8:-4] == grid[i][j]:
                     f = open(file)
                     row.append(plotCSV.toarray(f)[1:-1, 1:-1])
