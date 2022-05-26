@@ -35,14 +35,17 @@ class Layer:
         self.y_bottom = y_bottom
         self.cells = cells
     def getPixels(self,x_bl,z_bl,x_tr,z_tr):
-        list = [[ self.cells[z_bl+z][x_bl+x].draw() for x in range(x_tr-x_bl)] for z in range(z_tr-z_bl)]
-
-        arr = np.asarray(list)
+        list = [[ 0 for x in range(x_tr-x_bl)] for z in range(z_tr-z_bl)]
+#
+        list = np.asarray(list)
+        for z in range(z_tr-z_bl):
+            for x in range(x_tr - x_bl):
+                list[z][x]= self.cells[z_bl+z][x_bl+x].draw()
         #print(arr.shape)#print("shape",arr.shape)
         #print(arr)
         #out = im.fromarray(arr, "L")
         #out.show()
-        return arr
+        return list
     def wallCells(self):
         sum=0
         for _ in self.cells:
