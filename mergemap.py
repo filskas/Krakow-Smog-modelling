@@ -11,7 +11,8 @@ grid = [
     ["D-d-3-3", "D-d-3-4", "D-d-4-3", "D-d-4-4"],
 ]
 
-def createMap(grid):
+
+def createFullMap():
     T = []
     test = []
     for i in range(len(grid)):
@@ -22,7 +23,7 @@ def createMap(grid):
             for file in os.listdir("/terrainmodelKrakowSample"):
                 if file[8:-4] == grid[i][j]:
                     f = open(file)
-                    row.append(plotCSV.toarray(f))
+                    row.append(plotCSV.toarray(f)[1:-1, 1:-1])
                     f.close()
                     testrow.append(file[8:-4])
         T.append(row)
@@ -31,18 +32,18 @@ def createMap(grid):
     result = []
     for i in range(len(grid)):
         row = T[i][0]
-        for j in range(1,len(grid[0])):
-            row = np.concatenate((row,T[i][j]),axis=1)
-        if i == 0: result = row
-        else: result = np.concatenate((result,row),axis=0)
-
+        for j in range(1, len(grid[0])):
+            row = np.concatenate((row, T[i][j]), axis=1)
+        if i == 0:
+            result = row
+        else:
+            result = np.concatenate((result, row), axis=0)
 
     return result
 
 
-DATA = createMap(grid)
-
-plt.imshow(DATA, cmap='cool', interpolation='nearest')
-plt.title("2-D Heat Map")
-plt.show()
-
+# DATA = createFullMap()
+#
+# plt.imshow(DATA, cmap='cool', interpolation='nearest')
+# plt.title("2-D Heat Map")
+# plt.show()

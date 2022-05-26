@@ -7,6 +7,7 @@ from matplotlib.backend_bases import key_press_handler
 from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import plotCSV
+import mergemap
 
 generalMap=[]
 
@@ -116,12 +117,9 @@ def gui():
     tk.Button(frame, text="Exit", command=root.destroy).grid(column=1, row=0)
 """
 
-/
+
 def load():
-    file = open('testPradnik.csv', "r")
-    # file = open('testCentrum.csv', "r")
-    DATA = plotCSV.toarray(file)
-    file.close()
+    DATA = mergemap.createFullMap()
     global generalMap
     generalMap = createMap(DATA, np.amin(DATA), np.amax(DATA), 4)
 
