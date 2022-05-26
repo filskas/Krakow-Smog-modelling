@@ -3,8 +3,12 @@ import tkinter as tk
 import numpy as np
 from PIL import Image as im
 import matplotlib.pyplot as plt
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import plotCSV
+
+generalMap=[]
 
 class Cell:
     # type ->
@@ -31,8 +35,8 @@ class Layer:
     def getPixels(self,x_bl,z_bl,x_tr,z_tr):
         list = [[ self.cells[z][x].draw() for x in range(x_tr-x_bl)] for z in range(z_tr-z_bl)]
         arr = np.asarray(list)
-        print("shape",arr.shape)
-        print(arr)
+        #print("shape",arr.shape)
+        #print(arr)
         #out = im.fromarray(arr, "L")
         #out.show()
         return arr
@@ -55,30 +59,74 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
 
 
 def gui():
-    root = tk.Tk(screenName="loremipsows")
+    global generalMap
+    x,y= 0,0
+
+    n = len(generalMap)
+    cur_layer = 0
+
+    def switch(_):
+        nonlocal cur_layer
+        cur_layer +=_
+        if cur_layer<0:
+            cur_layer+=n
+        cur_layer %=n
+        print("switched to layer:",cur_layer)
+
+    def handle_keys(event):
+        if event.key == 'm':
+            switch(1)
+        if event.key == 'n':
+            switch(-1)
+        redraw()
+
+    def redraw():
+        nonlocal image
+        image = fig.figimage(generalMap[cur_layer].getPixels(0, 0, 500, 500))
+        canvas.draw()
+
+    root = tk.Tk()
+    root.wm_title("tytul")
+    fig = plt.Figure(figsize=(5,4),dpi=100)
+    image = fig.figimage(generalMap[cur_layer].getPixels(0, 0, 500, 500))
+    canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
+    canvas.draw()
+
+    # pack_toolbar=False will make it easier to use a layout manager later on.
+    toolbar = NavigationToolbar2Tk(canvas, root, pack_toolbar=False)
+    toolbar.update()
+
+    canvas.mpl_connect(
+        "key_press_event", handle_keys
+    )
+    canvas.mpl_connect("key_press_event", key_press_handler)
+
+    button_quit = tk.Button(master=root, text="Quit", command=root.quit)
+
+    button_quit.pack(side=tk.BOTTOM)
+    #slider_update.pack(side=tk.BOTTOM)
+    toolbar.pack(side=tk.BOTTOM, fill=tk.X)
+    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    tk.mainloop()
+"""
     frame = tk.Frame(root, borderwidth=10)
     frame.grid()
     tk.Label(frame, text="siema eniu").grid(column=0, row=0)
     tk.Button(frame, text="Exit", command=root.destroy).grid(column=1, row=0)
+"""
 
-    root.mainloop()
+/
+def load():
+    file = open('testPradnik.csv', "r")
+    # file = open('testCentrum.csv', "r")
+    DATA = plotCSV.toarray(file)
+    file.close()
+    global generalMap
+    generalMap = createMap(DATA, np.amin(DATA), np.amax(DATA), 4)
 
-
-file = open('testPradnik.csv', "r")
-# file = open('testCentrum.csv', "r")
-DATA = plotCSV.toarray(file)
-file.close()
-print(DATA.shape)
-map = createMap(DATA,np.amin(DATA),np.amax(DATA),4)
-for m in map:
-    print("walls:",m.wallCells())
-    print("all",m.cells.shape[0]*m.cells.shape[1])
-    #print(m.cells)
-    imager = m.getPixels(0, 0, 500, 500)
-    print(imager)
-    plt.imshow(imager)
-    plt.title("2-D Heat Map")
-    plt.show()
-
-
+def run():
+    load()
+    gui()
+run()
 
