@@ -1,4 +1,5 @@
 import tkinter as tk
+from pyglet.window import key
 
 import numpy as np
 from PIL import Image as im
@@ -34,9 +35,10 @@ class Layer:
         self.y_bottom = y_bottom
         self.cells = cells
     def getPixels(self,x_bl,z_bl,x_tr,z_tr):
-        list = [[ self.cells[z][x].draw() for x in range(x_tr-x_bl)] for z in range(z_tr-z_bl)]
+        list = [[ self.cells[z_bl+z][x_bl+x].draw() for x in range(x_tr-x_bl)] for z in range(z_tr-z_bl)]
+
         arr = np.asarray(list)
-        #print("shape",arr.shape)
+        #print(arr.shape)#print("shape",arr.shape)
         #print(arr)
         #out = im.fromarray(arr, "L")
         #out.show()
@@ -61,10 +63,15 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
 
 def gui():
     global generalMap
-    x,y= 0,0
+    x,z= 0,0
+
+    height,width = 500,500
 
     n = len(generalMap)
     cur_layer = 0
+    max_x =len(generalMap[cur_layer].cells[0])-1
+    max_z = len(generalMap[cur_layer].cells)-1
+    print(max_x, max_z)
 
     def switch(_):
         nonlocal cur_layer
@@ -74,24 +81,53 @@ def gui():
         cur_layer %=n
         print("switched to layer:",cur_layer)
 
+
     def handle_keys(event):
+        nonlocal x
+        nonlocal z
+        jump=5
         if event.key == 'm':
             switch(1)
         if event.key == 'n':
             switch(-1)
-        redraw()
+        if event.key == "left":
+            x-=jump
+            if x<0:
+                x=0
+        if event.key == "right":
+            x += jump
+            if x+width > max_x:
+                x = max_x-width
+        if event.key == "down":
+            z += jump
+            if z+height > max_z:
+                z = max_z-height
+        if event.key == "up":
+            z -= jump
+            if z < 0:
+                z = 0
+        print(type(event.key))
+        print(event.key)
 
-    def redraw():
-        nonlocal image
-        image = fig.figimage(generalMap[cur_layer].getPixels(0, 0, 500, 500))
-        canvas.draw()
+        print(x,z)
+        redraw()
 
     root = tk.Tk()
     root.wm_title("tytul")
-    fig = plt.Figure(figsize=(5,4),dpi=100)
-    image = fig.figimage(generalMap[cur_layer].getPixels(0, 0, 500, 500))
+    fig = plt.Figure(figsize=(5, 4), dpi=100)
+    image = fig.figimage(generalMap[cur_layer].getPixels(x, z, x + width, z + height))
     canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
     canvas.draw()
+
+    def redraw():
+        nonlocal image
+        nonlocal x
+        nonlocal z
+        fig.clf()
+        newframe =generalMap[cur_layer].getPixels(x, z, x+width, z+height)
+        image = fig.figimage(newframe)
+        canvas.draw()
+
 
     # pack_toolbar=False will make it easier to use a layout manager later on.
     toolbar = NavigationToolbar2Tk(canvas, root, pack_toolbar=False)
