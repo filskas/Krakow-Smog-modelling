@@ -1,5 +1,5 @@
 import tkinter as tk
-from pyglet.window import key
+# from pyglet.window import key
 
 import numpy as np
 from PIL import Image as im
@@ -9,6 +9,13 @@ from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import plotCSV
 import mergemap
+from model.Cube import Cube
+from model.Velocity import Velocity
+from model.Type import Type
+
+air_velocity = Velocity(2, 5, 2, 5, 0, 0)
+wall_velocity = Velocity(0, 0, 0, 0, 0, 0)
+pollution_rate = 0.2
 
 generalMap=[]
 
@@ -54,13 +61,27 @@ class Layer:
                     sum+=1
         return sum
 
+
+def coordinates_within_bounds(point, bound1, bound2, bound3):
+    return bound1[0] <= point[0] <= bound1[1] and bound2[0] <= point[1] <= bound2[1] and bound3[0] <= point[2] <= bound3[1]
+
+
 def createMap(data, minheight, maxheight, n_HorizontalCubes):
     cube_h = (maxheight - minheight) / n_HorizontalCubes
     layers = []
-
+    relative_neighbors = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
     for i in range(n_HorizontalCubes):
-        layerd = np.array([[ Cell(-1 if data[row][col] >= i*cube_h+minheight else 0 ) for col in range(len(data[row]))] for row in range(len(data))])
+        layerd = np.array([[Cube(Type.AIR if data[row][col] >= i*cube_h+minheight else Type.WALL, (row, col, i),
+                                 (cube_h, cube_h, cube_h), pollution_rate, air_velocity
+                                 if data[row][col] >= i*cube_h+minheight else wall_velocity, 0)
+                            for col in range(len(data[row]))] for row in range(len(data))])
         layers.append(Layer(i*cube_h+minheight,cube_h,layerd))
+    # for i in range(n_HorizontalCubes):
+    #     for layerd in layers[i].cells:
+    #         for row in layerd:
+    #             for elem in row:
+    #                 elem.
+
     return layers
 
 

@@ -1,6 +1,6 @@
 from numpy import sign
-from Type import Type
-from Velocity import Velocity, other_axes
+from model.Type import Type
+from model.Velocity import Velocity, other_axes
 
 
 def reverse_direction(direction):
@@ -11,7 +11,7 @@ class Cube:
     NUMBER_OF_DIMENSIONS = 3
     DIFFUSION_COEFFICIENT = 0.4
     WIND_FACTOR = 1
-    THRESHOLDS = (0.1, 0.3, 0.6, 0.9)
+    THRESHOLDS = (0, 0.1, 0.3, 0.6, 0.9, 1)
 
     def __init__(self, type, coordinates, size, pollution_rate, velocity, pressure):
         self._type = type
@@ -105,4 +105,16 @@ class Cube:
             self.previous_pollution_rate = self.pollution_rate
             for neighbor in self.neighbors.keys():
                 self.interact_with_neighbor(neighbor)
+
+    def get_pollution_level(self):
+        for i in range(len(self.THRESHOLDS) - 1):
+            if self.THRESHOLDS[i] < self.pollution_rate <= self.THRESHOLDS[i + 1]:
+                return self.THRESHOLDS[i + 1]
+        return self.THRESHOLDS[0]
+
+    def draw(self):
+        if self.type in (Type.WALL, Type.GROUND):
+            return 0
+        else:
+            return self.get_pollution_level() * 5
 
