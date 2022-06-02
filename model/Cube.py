@@ -114,7 +114,7 @@ class Cube:
 
     def draw(self):
         if self.type in (Type.WALL, Type.GROUND):
-            return 0
+            return [1,1,1,255]
         else:
-            return self.get_pollution_level() * 5
+            return [255,255,255,self.get_pollution_level() * 255]
 

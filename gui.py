@@ -4,6 +4,7 @@ import tkinter as tk
 import numpy as np
 from PIL import Image as im
 import matplotlib.pyplot as plt
+from PIL import Image
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -15,8 +16,7 @@ from model.Type import Type
 
 air_velocity = Velocity(2, 5, 2, 5, 0, 0)
 wall_velocity = Velocity(0, 0, 0, 0, 0, 0)
-pollution_rate = 0.2
-
+pollution_rate = 0.2;
 generalMap=[]
 
 class Cell:
@@ -42,9 +42,11 @@ class Layer:
         self.y_bottom = y_bottom
         self.cells = cells
     def getPixels(self,x_bl,z_bl,x_tr,z_tr):
-        list = [[ 0 for x in range(x_tr-x_bl)] for z in range(z_tr-z_bl)]
-#
-        list = np.asarray(list)
+        list = [[(1, 1, 1, 1) for x in range(x_tr - x_bl)] for z in range(z_tr - z_bl)]
+        #
+        list = np.array(list, dtype=object)
+
+
         for z in range(z_tr-z_bl):
             for x in range(x_tr - x_bl):
                 list[z][x]= self.cells[z_bl+z][x_bl+x].draw()
@@ -92,7 +94,7 @@ def gui():
     height,width = 500,500
 
     n = len(generalMap)
-    cur_layer = 0
+    cur_layer = 2
     max_x =len(generalMap[cur_layer].cells[0])-1
     max_z = len(generalMap[cur_layer].cells)-1
     print(max_x, max_z)
@@ -139,7 +141,7 @@ def gui():
     root = tk.Tk()
     root.wm_title("tytul")
     fig = plt.Figure(figsize=(5, 4), dpi=100)
-    image = fig.figimage(generalMap[cur_layer].getPixels(x, z, x + width, z + height))
+    image = fig.figimage(Image.fromarray(np.uint8(generalMap[cur_layer].getPixels(x, z, x + width, z + height)),mode="RGBA"))
     canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
     canvas.draw()
 
@@ -148,7 +150,8 @@ def gui():
         nonlocal x
         nonlocal z
         fig.clf()
-        newframe =generalMap[cur_layer].getPixels(x, z, x+width, z+height)
+        newframe =Image.fromarray(np.uint8(generalMap[cur_layer].getPixels(x, z, x+width, z+height)),mode="RGBA")
+        newframe.save("d.png")
         image = fig.figimage(newframe)
         canvas.draw()
 
