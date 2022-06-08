@@ -112,7 +112,7 @@ def gui():
 
     root = tk.Tk()
     root.wm_title("tytul")
-    fig = plt.Figure(figsize=(5, 4), dpi=100)
+    fig = plt.Figure(figsize=(5, 5), dpi=100)
     image = fig.figimage(
         Image.fromarray(np.uint8(generalMap[cur_layer].getPixels(x, z, x + width, z + height)), mode="RGBA"))
     canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
