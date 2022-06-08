@@ -1,4 +1,7 @@
 import numpy as np
+from model.Cube import WALL_COLOR
+from utils import isWithin
+from utils import timeCheck
 
 
 class Layer:
@@ -7,9 +10,22 @@ class Layer:
         self.y_bottom = y_bottom
         self.cells = cells
     def getPixels(self,x_bl,z_bl,x_tr,z_tr):
-        list = [[self.cells[z_bl+z][x_bl+x].draw() for x in range(x_tr - x_bl)] for z in range(z_tr - z_bl)]
-        #
+        print("startpxlGet", timeCheck())
+
+        list = [[WALL_COLOR for x in range(x_tr - x_bl)] for z in range(z_tr - z_bl)]
+        print("listcrt", timeCheck())
+
+        #todo? multithreading filling
+        for z in range(z_tr - z_bl):
+            iter = self.cells[z_bl + z][x_bl]
+            while iter is not None and isWithin(iter.coordinates,(x_bl,z_bl),(x_tr,z_tr)):
+                coor = iter.coordinates
+                list[z][coor[1]-x_bl]=iter.draw()
+                iter = iter.nextAir
+        print("listfilled", timeCheck())
+
         list = np.array(list, dtype=object)
+        print("nparrd", timeCheck())
 
 
         """
@@ -23,6 +39,23 @@ class Layer:
         #out = im.fromarray(arr, "L")
         #out.show()
         return list
+
+    def calculateUpdate(self):
+        for z in range(len(self.cells)):
+            iter = self.cells[z][0]
+            while iter is not None:
+                #TODO : iter.update
+                iter = iter.nextAir
+    def applyUpdate(self):
+        for z in range(len(self.cells)):
+            iter = self.cells[z][0]
+            while iter is not None:
+                #TODO : iter.applyUpdate
+                iter = iter.nextAir
+
+    def getPixelsToArray(self,x_bl,z_bl,x_tr,z_tr,out_arr,ind):
+        out_arr[ind] = self.getPixels(x_bl, z_bl, x_tr, z_tr)
+
     def wallCells(self):
         sum=0
         for _ in self.cells:

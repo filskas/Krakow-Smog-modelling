@@ -6,6 +6,7 @@ from model.Velocity import Velocity, other_axes
 def reverse_direction(direction):
     return tuple((-element for element in direction))
 
+WALL_COLOR=[1,1,1,255]
 
 class Cube:
     NUMBER_OF_DIMENSIONS = 3
@@ -22,6 +23,15 @@ class Cube:
         self._velocity = velocity
         self.neighbors = dict()
         self.pressure = pressure
+        self._nextAir = None
+
+    @property
+    def nextAir(self):
+        return self._nextAir
+
+    @nextAir.setter
+    def nextAir(self, nnext):
+        self._nextAir = nnext
 
     @property
     def type(self):
@@ -114,7 +124,7 @@ class Cube:
 
     def draw(self):
         if self.type in (Type.WALL, Type.GROUND):
-            return [1,1,1,255]
+            return WALL_COLOR
         else:
             return [255,0,0,self.get_pollution_level() * 255]
 
