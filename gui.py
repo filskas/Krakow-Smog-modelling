@@ -13,27 +13,14 @@ import mergemap
 from model.Cube import Cube
 from model.Velocity import Velocity
 from model.Type import Type
+import utils
 
 air_velocity = Velocity(2, 5, 2, 5, 0, 0)
 wall_velocity = Velocity(0, 0, 0, 0, 0, 0)
 pollution_rate = 0.2;
 generalMap=[]
-
-class Cell:
-    # type ->
-    # -1 wall
-    # [0,1] smoke
-    condensation = 0
-
-    def __init__(self, type):
-        self.type = type
-
-    def draw(self):
-        if self.type == -1:
-            return 0
-        else:
-            return 1
-
+isDrawingBlocker=False
+window_size = (500 ,500)
 
 
 class Layer:
@@ -42,14 +29,17 @@ class Layer:
         self.y_bottom = y_bottom
         self.cells = cells
     def getPixels(self,x_bl,z_bl,x_tr,z_tr):
-        list = [[(1, 1, 1, 1) for x in range(x_tr - x_bl)] for z in range(z_tr - z_bl)]
+        list = [[self.cells[z_bl+z][x_bl+x].draw() for x in range(x_tr - x_bl)] for z in range(z_tr - z_bl)]
         #
         list = np.array(list, dtype=object)
 
 
+        """
         for z in range(z_tr-z_bl):
             for x in range(x_tr - x_bl):
                 list[z][x]= self.cells[z_bl+z][x_bl+x].draw()
+        replaced for inline construction above"""
+
         #print(arr.shape)#print("shape",arr.shape)
         #print(arr)
         #out = im.fromarray(arr, "L")
@@ -73,7 +63,7 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
     layers = []
     relative_neighbors = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
     for i in range(n_HorizontalCubes):
-        layerd = np.array([[Cube(Type.AIR if data[row][col] >= i*cube_h+minheight else Type.WALL, (row, col, i),
+        layerd = np.array([[Cube(Type.WALL if data[row][col] >= i*cube_h+minheight else Type.AIR, (row, col, i),
                                  (cube_h, cube_h, cube_h), pollution_rate, air_velocity
                                  if data[row][col] >= i*cube_h+minheight else wall_velocity, 0)
                             for col in range(len(data[row]))] for row in range(len(data))])
@@ -91,7 +81,7 @@ def gui():
     global generalMap
     x,z= 0,0
 
-    height,width = 500,500
+    height,width = window_size
 
     n = len(generalMap)
     cur_layer = 2
@@ -136,7 +126,8 @@ def gui():
         print(event.key)
 
         print(x,z)
-        redraw()
+        if not isDrawingBlocker:
+            redraw()
 
     root = tk.Tk()
     root.wm_title("tytul")
@@ -146,14 +137,30 @@ def gui():
     canvas.draw()
 
     def redraw():
+        #print("start",timeCheck())
+        global isDrawingBlocker
+        isDrawingBlocker=True
         nonlocal image
         nonlocal x
         nonlocal z
         fig.clf()
-        newframe =Image.fromarray(np.uint8(generalMap[cur_layer].getPixels(x, z, x+width, z+height)),mode="RGBA")
-        newframe.save("d.png")
-        image = fig.figimage(newframe)
+        #print("scrClr",timeCheck())
+
+        fig.figimage(Image.fromarray(np.uint8(generalMap[0].getPixels(x, z, x+width, z+height)),mode="RGBA"))
+        #print("drawnBck",timeCheck())
+        for _i in range(cur_layer):
+            pxls =generalMap[_i].getPixels(x, z, x+width, z+height)
+           # print("gotPixels", timeCheck())
+            pxls = np.uint8(pxls)
+          #  print("uinted", timeCheck())
+            im =Image.fromarray(pxls,mode="RGBA")
+         #   print("imaged", timeCheck())
+            fig.figimage(im,alpha=0.5)
+            #print("drawed", timeCheck())
+
+        #print("findraw", timeCheck())
         canvas.draw()
+        isDrawingBlocker=False
 
 
     # pack_toolbar=False will make it easier to use a layout manager later on.

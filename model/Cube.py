@@ -116,5 +116,5 @@ class Cube:
         if self.type in (Type.WALL, Type.GROUND):
             return [1,1,1,255]
         else:
-            return [255,255,255,self.get_pollution_level() * 255]
+            return [255,0,0,self.get_pollution_level() * 255]
 
