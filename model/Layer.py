@@ -10,10 +10,10 @@ class Layer:
         self.y_bottom = y_bottom
         self.cells = cells
     def getPixels(self,x_bl,z_bl,x_tr,z_tr):
-        print("startpxlGet", timeCheck())
+        #print("startpxlGet", timeCheck())
 
         list = [[WALL_COLOR for x in range(x_tr - x_bl)] for z in range(z_tr - z_bl)]
-        print("listcrt", timeCheck())
+        #print("listcrt", timeCheck())
 
         #todo? multithreading filling
         for z in range(z_tr - z_bl):
@@ -22,10 +22,10 @@ class Layer:
                 coor = iter.coordinates
                 list[z][coor[1]-x_bl]=iter.draw()
                 iter = iter.nextAir
-        print("listfilled", timeCheck())
+        #print("listfilled", timeCheck())
 
         list = np.array(list, dtype=object)
-        print("nparrd", timeCheck())
+        #print("nparrd", timeCheck())
 
 
         """
@@ -55,6 +55,7 @@ class Layer:
 
     def getPixelsToArray(self,x_bl,z_bl,x_tr,z_tr,out_arr,ind):
         out_arr[ind] = self.getPixels(x_bl, z_bl, x_tr, z_tr)
+        print("Layer ",ind," getpixeled")
 
     def wallCells(self):
         sum=0

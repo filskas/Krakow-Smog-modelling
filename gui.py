@@ -21,10 +21,11 @@ import utils
 
 air_velocity = Velocity(2, 5, 2, 5, 0, 0)
 wall_velocity = Velocity(0, 0, 0, 0, 0, 0)
-pollution_rate = 0.2;
+pollution_rate = 0.2
 generalMap = []
 isDrawingBlocker = False
 window_size = (500, 500)
+n_layers = 10
 
 
 def coordinates_within_bounds(point, bound1, bound2, bound3):
@@ -34,9 +35,10 @@ def coordinates_within_bounds(point, bound1, bound2, bound3):
 
 def createMap(data, minheight, maxheight, n_HorizontalCubes):
     cube_h = (maxheight - minheight) / n_HorizontalCubes
-    layers = []
+    layers = [[] for _ in range(n_HorizontalCubes)]
     relative_neighbors = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
-    for i in range(n_HorizontalCubes):
+
+    def generate_layer(i):
         layerd = np.array([[Cube(Type.WALL if data[row][col] >= i * cube_h + minheight else Type.AIR, (row, col, i),
                                  (cube_h, cube_h, cube_h), pollution_rate, air_velocity
                                  if data[row][col] >= i * cube_h + minheight else wall_velocity, 0)
@@ -48,14 +50,22 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
                 layerd[y][x].nextAir = nextCube
                 if layerd[y][x].type == Type.AIR:
                     nextCube = layerd[y][x]
+        print("created Layer number:",i,"/",n_HorizontalCubes-1)
+        layers[i] = Layer(i * cube_h + minheight, cube_h, layerd)
 
-        layers.append(Layer(i * cube_h + minheight, cube_h, layerd))
+    threads = []
+    for _i in range(n_HorizontalCubes):
+            threads.append(
+                threading.Thread(target=generate_layer, args=[_i]))
+            threads[-1].start()
+    for _i in range(n_layers):
+            threads[_i].join()
     # for i in range(n_HorizontalCubes):
     #     for layerd in layers[i].cells:
     #         for row in layerd:
     #             for elem in row:
     #                 elem.
-
+    print(layers)
     return layers
 
 
@@ -69,7 +79,7 @@ def gui():
     cur_layer = 2
     max_x = len(generalMap[cur_layer].cells[0]) - 1
     max_z = len(generalMap[cur_layer].cells) - 1
-    print(max_x, max_z)
+    #print(max_x, max_z)
 
     def switch(_):
         nonlocal cur_layer
@@ -103,6 +113,9 @@ def gui():
             z -= jump
             if z < 0:
                 z = 0
+        if event.key == 'u':
+            print("trying to update")
+            Update(generalMap)
         print(type(event.key))
         print(event.key)
 
@@ -181,14 +194,17 @@ def gui():
 
 def load():
     DATA = mergemap.createFullMap()
-    print(DATA.shape)
+    print("merged data as :",DATA.shape)
 
     global generalMap
-    generalMap = createMap(DATA, np.amin(DATA), np.amax(DATA), 4)
+    print("creating map")
+    generalMap = createMap(DATA, np.amin(DATA), np.amax(DATA), n_layers)
 
 
 def run():
+    print("started")
     load()
+    print("loadeddata")
     gui()
 
 
