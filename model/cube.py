@@ -1,6 +1,6 @@
 from numpy import sign
-from model.Type import Type
-from model.Velocity import Velocity, other_axes
+from model.type import Type
+from model.velocity import Velocity, other_axes
 
 
 def reverse_direction(direction):
@@ -19,7 +19,7 @@ class Cube:
         self._coordinates = coordinates
         self._size = size
         self.pollution_rate = pollution_rate
-        self.previous_pollution_rate = pollution_rate
+        self.new_pollution_rate = 0
         self._velocity = velocity
         self.neighbors = dict()
         self.pressure = pressure
@@ -100,8 +100,8 @@ class Cube:
                + self.DIFFUSION_COEFFICIENT
 
     def update_from_neighbor(self, neighbor):
-        self.pollution_rate += self.transfer_coefficient_of_pollutant_from_neighbor(neighbor) \
-                               * (neighbor.previous_pollution_rate - self.previous_pollution_rate)
+        self.new_pollution_rate += self.transfer_coefficient_of_pollutant_from_neighbor(neighbor) \
+                               * (neighbor.pollution_rate - self.pollution_rate)
 
     def interact_with_neighbor(self, neighbor):
         if neighbor.type in (Type.WALL, Type.GROUND):
@@ -110,9 +110,12 @@ class Cube:
         else:
             self.update_from_neighbor(neighbor)
 
-    def move(self):
+    def apply_update(self):
+        self.pollution_rate = self.new_pollution_rate
+
+    def update(self):
         if self.type == Type.AIR:
-            self.previous_pollution_rate = self.pollution_rate
+            self.new_pollution_rate = self.pollution_rate
             for neighbor in self.neighbors.keys():
                 self.interact_with_neighbor(neighbor)
 
@@ -126,5 +129,5 @@ class Cube:
         if self.type in (Type.WALL, Type.GROUND):
             return WALL_COLOR
         else:
-            return [255,0,0,self.get_pollution_level() * 255]
+            return [255, 0, 0, self.get_pollution_level() * 255]
 

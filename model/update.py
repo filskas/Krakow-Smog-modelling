@@ -1,5 +1,6 @@
 import threading
-import Layer
+
+
 def Update(map):
     n_layers = len(map)
     threads = []
