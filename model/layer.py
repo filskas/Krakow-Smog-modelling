@@ -1,5 +1,5 @@
 import numpy as np
-from model.Cube import WALL_COLOR
+from model.cube import WALL_COLOR
 from utils import isWithin
 from utils import timeCheck
 
@@ -45,12 +45,15 @@ class Layer:
             iter = self.cells[z][0]
             while iter is not None:
                 #TODO : iter.update
+                iter.update()
                 iter = iter.nextAir
+
     def applyUpdate(self):
         for z in range(len(self.cells)):
             iter = self.cells[z][0]
             while iter is not None:
-                #TODO : iter.applyUpdate
+                # TODO : iter.applyUpdate
+                iter.apply_update()
                 iter = iter.nextAir
 
     def getPixelsToArray(self,x_bl,z_bl,x_tr,z_tr,out_arr,ind):

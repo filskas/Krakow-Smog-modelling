@@ -11,12 +11,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import plotCSV
 import threading
 import mergemap
-from model.Cube import Cube
-from model.Velocity import Velocity
-from model.Type import Type
-from model.Layer import Layer
+from model.cube import Cube
+from model.velocity import Velocity
+from model.type import Type
+from model.layer import Layer
 from utils import ThreadWithReturnValue
-from model.Update import Update
+from model.update import Update
 import utils
 
 air_velocity = Velocity(2, 5, 2, 5, 0, 0)
