@@ -1,6 +1,6 @@
 import tkinter as tk
 # from pyglet.window import key
-
+import random
 import numpy as np
 from PIL import Image as im
 import matplotlib.pyplot as plt
@@ -25,7 +25,7 @@ pollution_rate = 0.2
 generalMap = []
 isDrawingBlocker = False
 window_size = (500, 500)
-n_layers = 10
+n_layers = 6
 
 
 def coordinates_within_bounds(point, bound1, bound2, bound3):
@@ -40,8 +40,8 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
 
     def generate_layer(i):
         layerd = np.array([[Cube(Type.WALL if data[row][col] >= i * cube_h + minheight else Type.AIR, (row, col, i),
-                                 (cube_h, cube_h, cube_h), pollution_rate, air_velocity
-                                 if data[row][col] >= i * cube_h + minheight else wall_velocity, 0)
+                                 (cube_h, cube_h, cube_h), random.random(), wall_velocity
+                                 if data[row][col] >= i * cube_h + minheight else air_velocity, 0)
                             for col in range(len(data[row]))] for row in range(len(data))])
         # calculating nextToIterate
         for y in range(len(layerd)):
@@ -50,6 +50,7 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
                 layerd[y][x].nextAir = nextCube
                 if layerd[y][x].type == Type.AIR:
                     nextCube = layerd[y][x]
+
         print("created Layer number:",i,"/",n_HorizontalCubes-1)
         layers[i] = Layer(i * cube_h + minheight, cube_h, layerd)
 
@@ -66,6 +67,13 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
     #             for elem in row:
     #                 elem.
     print(layers)
+
+    for z in range(len(layers)):
+        for y in range(len(layers[z].cells)):
+            for x in range(len(layers[z].cells[y])):
+                for rel in relative_neighbors:
+                    if n_HorizontalCubes>z+rel[2]>=0 and len(layers[z].cells)>y+rel[1]>=0 and len(layers[z].cells[y])>x+rel[0]>=0:
+                        layers[z].cells[y][x].add_neighbor(layers[z+rel[2]].cells[y+rel[1]][x+rel[0]], rel)
     return layers
 
 

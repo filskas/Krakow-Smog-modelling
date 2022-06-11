@@ -2,7 +2,7 @@ import numpy as np
 from model.cube import WALL_COLOR
 from utils import isWithin
 from utils import timeCheck
-
+import model.type
 
 class Layer:
     def __init__(self, y_bottom, h, cells):
@@ -47,6 +47,7 @@ class Layer:
                 #TODO : iter.update
                 iter.update()
                 iter = iter.nextAir
+        print("sum of pollution on layer:",self.y_bottom," ",self.pollutionSum())
 
     def applyUpdate(self):
         for z in range(len(self.cells)):
@@ -66,4 +67,12 @@ class Layer:
             for __ in _:
                 if __.type == -1:
                     sum+=1
+        return sum
+
+    def pollutionSum(self):
+        sum=0
+        for _ in self.cells:
+            for __ in _:
+                if __.type == type.Type.AIR:
+                    sum+=__.pollution_rate
         return sum
