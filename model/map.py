@@ -1,0 +1,60 @@
+import threading
+
+from model.SETTINGS import *
+from model.cube import *
+from model.layer import *
+import numpy as np
+import random
+
+def createMap(data, minheight, maxheight, n_HorizontalCubes):
+    cube_h = (maxheight - minheight) / n_HorizontalCubes
+    layers = [[] for _ in range(n_HorizontalCubes)]
+    relative_neighbors = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
+
+    def generate_layer(i):
+        layerd = np.array([[Cube(Type.WALL if data[row][col] >= i * cube_h + minheight else Type.AIR, (row, col, i),
+                                 (cube_h, cube_h, cube_h), random.random(), wall_velocity
+                                 if data[row][col] >= i * cube_h + minheight else air_velocity, 0)
+                            for col in range(len(data[row]))] for row in range(len(data))])
+        # calculating nextToIterate
+        for y in range(len(layerd)):
+            nextCube = None
+            for x in reversed(range(len(layerd[y]))):
+                layerd[y][x].nextAir = nextCube
+                if layerd[y][x].type == Type.AIR:
+                    nextCube = layerd[y][x]
+
+        print("created Layer number:",i,"/",n_HorizontalCubes-1)
+        layers[i] = Layer(i * cube_h + minheight, cube_h, layerd)
+
+    threads = []
+    for _i in range(n_HorizontalCubes):
+            threads.append(
+                threading.Thread(target=generate_layer, args=[_i]))
+            threads[-1].start()
+    for _i in range(n_layers):
+            threads[_i].join()
+    # for i in range(n_HorizontalCubes):
+    #     for layerd in layers[i].cells:
+    #         for row in layerd:
+    #             for elem in row:
+    #                 elem.
+    print(layers)
+
+    for z in range(len(layers)):
+        for y in range(len(layers[z].cells)):
+            for x in range(len(layers[z].cells[y])):
+                for rel in relative_neighbors:
+                    if not( n_HorizontalCubes>z+rel[2]>=0 and len(layers[z].cells)>y+rel[1]>=0 and len(layers[z].cells[y])>x+rel[0]>=0):
+                        layers[z].cells[y][x].type = Type.WALL
+
+    for z in range(len(layers)):
+        for y in range(len(layers[z].cells)):
+            for x in range(len(layers[z].cells[y])):
+                for rel in relative_neighbors:
+                    if n_HorizontalCubes>z+rel[2]>=0 and len(layers[z].cells)>y+rel[1]>=0 and len(layers[z].cells[y])>x+rel[0]>=0:
+                        layers[z].cells[y][x].add_neighbor(layers[z+rel[2]].cells[y+rel[1]][x+rel[0]], rel)
+
+
+    return layers
+

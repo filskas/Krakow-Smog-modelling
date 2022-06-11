@@ -12,69 +12,16 @@ import plotCSV
 import threading
 import mergemap
 from model.cube import Cube
+from model.map import *
 from model.velocity import Velocity
 from model.type import Type
 from model.layer import Layer
-from utils import ThreadWithReturnValue
 from model.update import Update
-import utils
-
-air_velocity = Velocity(2, 5, 2, 5, 0, 0)
-wall_velocity = Velocity(0, 0, 0, 0, 0, 0)
-pollution_rate = 0.2
-generalMap = []
-isDrawingBlocker = False
-window_size = (500, 500)
-n_layers = 6
+from utils import *
+from model.SETTINGS import *
 
 
-def coordinates_within_bounds(point, bound1, bound2, bound3):
-    return bound1[0] <= point[0] <= bound1[1] and bound2[0] <= point[1] <= bound2[1] and bound3[0] <= point[2] <= \
-           bound3[1]
 
-
-def createMap(data, minheight, maxheight, n_HorizontalCubes):
-    cube_h = (maxheight - minheight) / n_HorizontalCubes
-    layers = [[] for _ in range(n_HorizontalCubes)]
-    relative_neighbors = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
-
-    def generate_layer(i):
-        layerd = np.array([[Cube(Type.WALL if data[row][col] >= i * cube_h + minheight else Type.AIR, (row, col, i),
-                                 (cube_h, cube_h, cube_h), random.random(), wall_velocity
-                                 if data[row][col] >= i * cube_h + minheight else air_velocity, 0)
-                            for col in range(len(data[row]))] for row in range(len(data))])
-        # calculating nextToIterate
-        for y in range(len(layerd)):
-            nextCube = None
-            for x in reversed(range(len(layerd[y]))):
-                layerd[y][x].nextAir = nextCube
-                if layerd[y][x].type == Type.AIR:
-                    nextCube = layerd[y][x]
-
-        print("created Layer number:",i,"/",n_HorizontalCubes-1)
-        layers[i] = Layer(i * cube_h + minheight, cube_h, layerd)
-
-    threads = []
-    for _i in range(n_HorizontalCubes):
-            threads.append(
-                threading.Thread(target=generate_layer, args=[_i]))
-            threads[-1].start()
-    for _i in range(n_layers):
-            threads[_i].join()
-    # for i in range(n_HorizontalCubes):
-    #     for layerd in layers[i].cells:
-    #         for row in layerd:
-    #             for elem in row:
-    #                 elem.
-    print(layers)
-
-    for z in range(len(layers)):
-        for y in range(len(layers[z].cells)):
-            for x in range(len(layers[z].cells[y])):
-                for rel in relative_neighbors:
-                    if n_HorizontalCubes>z+rel[2]>=0 and len(layers[z].cells)>y+rel[1]>=0 and len(layers[z].cells[y])>x+rel[0]>=0:
-                        layers[z].cells[y][x].add_neighbor(layers[z+rel[2]].cells[y+rel[1]][x+rel[0]], rel)
-    return layers
 
 
 def gui():
@@ -87,7 +34,7 @@ def gui():
     cur_layer = 2
     max_x = len(generalMap[cur_layer].cells[0]) - 1
     max_z = len(generalMap[cur_layer].cells) - 1
-    #print(max_x, max_z)
+
 
     def switch(_):
         nonlocal cur_layer
@@ -100,35 +47,42 @@ def gui():
     def handle_keys(event):
         nonlocal x
         nonlocal z
+        key = event.key.lower()
         jump = 5
-        if event.key == 'm':
+        if key == 'm':
             switch(1)
-        if event.key == 'n':
+        if key == 'n':
             switch(-1)
-        if event.key == "left":
+        if key == "left":
             x -= jump
             if x < 0:
                 x = 0
-        if event.key == "right":
+            print(event.key)
+            print(x, z)
+        if key == "right":
             x += jump
             if x + width > max_x:
                 x = max_x - width
-        if event.key == "down":
+            print(event.key)
+            print(x, z)
+        if key == "down":
             z += jump
             if z + height > max_z:
                 z = max_z - height
-        if event.key == "up":
+            print(event.key)
+            print(x, z)
+        if key == "up":
             z -= jump
             if z < 0:
                 z = 0
-        if event.key == 'u':
+            print(event.key)
+            print(x, z)
+        if key == 'u':
             print("trying to update")
             Update(generalMap)
-        print(type(event.key))
-        print(event.key)
 
-        print(x, z)
         if not isDrawingBlocker:
+            print("redrawing")
             redraw()
 
     root = tk.Tk()
@@ -140,38 +94,48 @@ def gui():
     canvas.draw()
 
     def redraw():
-        # print("start",timeCheck())
+        printIfDBG(("start",timeCheck()),TIMEPRINT)
         global isDrawingBlocker
         isDrawingBlocker = True
         nonlocal image
         nonlocal x
         nonlocal z
         fig.clf()
-        # print("scrClr",timeCheck())
+        printIfDBG(("scrClr",timeCheck()),TIMEPRINT)
 
-        fig.figimage(Image.fromarray(np.uint8(generalMap[0].getPixels(x, z, x + width, z + height)), mode="RGBA"))
-        # print("drawnBck",timeCheck())
-        pxls =[[] for _i in range(cur_layer)]
+        pxls = [[] for _i in range(cur_layer)]
+        pxl = []
         threads= []
-        for _i in range(cur_layer):
-            threads.append(threading.Thread( target=generalMap[_i].getPixelsToArray, args=(x, z, x + width, z + height,pxls,_i)))
-            threads[-1].start()
-        for _i in range(cur_layer):
-            threads[_i].join()
-            #print(pxls[_i])
-        for _i in range(cur_layer):
-            #pxls = generalMap[_i].getPixels(x, z, x + width, z + height)
-            # print("gotPixels", timeCheck())
-            pxls[_i] = np.uint8(pxls[_i])
-            #  print("uinted", timeCheck())
-            im = Image.fromarray(pxls[_i], mode="RGBA")
-            #   print("imaged", timeCheck())
-            fig.figimage(im, alpha=0.5)
-            # print("drawed", timeCheck())
 
-        # print("findraw", timeCheck())
+        if multiple_layers_draw:
+                        for _i in range(cur_layer):
+                            threads.append(threading.Thread( target=generalMap[_i].getPixelsToArray, args=(x, z, x + width, z + height,pxls,_i)))
+                            threads[-1].start()
+                        for _i in range(cur_layer):
+                            threads[_i].join()
+                        for _i in range(cur_layer):
+
+                            printIfDBG(("   gotPixels", timeCheck()), TIMEPRINT)
+                            pxls[_i] = np.uint8(pxls[_i])
+                            printIfDBG(("   uinted", timeCheck()),TIMEPRINT)
+                            im = Image.fromarray(pxls[_i], mode="RGBA")
+                            printIfDBG(("   imaged", timeCheck()),TIMEPRINT)
+                            fig.figimage(im, alpha=0.5)
+        else:
+
+            _i = cur_layer
+            pxls = generalMap[_i].getPixels(x, z, x + width, z + height)
+            printIfDBG(("   gotPixels", timeCheck()),TIMEPRINT)
+            pxls = np.uint8(pxls)
+            printIfDBG(("   uinted", timeCheck()),TIMEPRINT)
+            im = Image.fromarray(pxls, mode="RGBA")
+            printIfDBG(("   imaged", timeCheck()),TIMEPRINT)
+            fig.figimage(im)
+            printIfDBG(("   drawed", timeCheck()),TIMEPRINT)
+
         canvas.draw()
         isDrawingBlocker = False
+
 
     # pack_toolbar=False will make it easier to use a layout manager later on.
     toolbar = NavigationToolbar2Tk(canvas, root, pack_toolbar=False)

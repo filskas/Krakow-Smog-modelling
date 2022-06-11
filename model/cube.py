@@ -39,7 +39,7 @@ class Cube:
 
     @type.setter
     def type(self, value):
-        if value not in Type.list():
+        if value not in [Type.WALL,Type.GROUND,Type.AIR]:
             raise ValueError("No such cube type.")
         self._type = value
 
@@ -102,6 +102,7 @@ class Cube:
     def update_from_neighbor(self, neighbor):
         self.new_pollution_rate += self.transfer_coefficient_of_pollutant_from_neighbor(neighbor) \
                                * (neighbor.pollution_rate - self.pollution_rate)
+        self.apply_update()
 
     def interact_with_neighbor(self, neighbor):
         if neighbor.type in (Type.WALL, Type.GROUND):
@@ -129,5 +130,5 @@ class Cube:
         if self.type in (Type.WALL, Type.GROUND):
             return WALL_COLOR
         else:
-            return [255, 0, 0, self.get_pollution_level() * 255]
+            return [255, 0, 0, self.pollution_rate * 255]
 

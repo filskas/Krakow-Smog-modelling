@@ -73,6 +73,5 @@ class Layer:
         sum=0
         for _ in self.cells:
             for __ in _:
-                if __.type == type.Type.AIR:
-                    sum+=__.pollution_rate
+                    sum += __.pollution_rate
         return sum
