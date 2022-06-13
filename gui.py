@@ -121,8 +121,8 @@ def gui():
                             im = Image.fromarray(pxls[_i], mode="RGBA")
                             printIfDBG(("   imaged", timeCheck()),TIMEPRINT)
                             fig.figimage(im, alpha=0.5)
+                            print("drawed")
         else:
-
             _i = cur_layer
             pxls = generalMap[_i].getPixels(x, z, x + width, z + height)
             printIfDBG(("   gotPixels", timeCheck()),TIMEPRINT)
@@ -145,6 +145,7 @@ def gui():
         "key_press_event", handle_keys
     )
     canvas.mpl_connect("key_press_event", key_press_handler)
+
 
     button_quit = tk.Button(master=root, text="Quit", command=root.quit)
 
