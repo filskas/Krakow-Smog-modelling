@@ -5,6 +5,7 @@ from model.cube import *
 from model.layer import *
 import numpy as np
 import random
+from streets import toArray
 
 def createMap(data, minheight, maxheight, n_HorizontalCubes):
     cube_h = (maxheight - minheight) / n_HorizontalCubes
@@ -12,8 +13,9 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
     relative_neighbors = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
 
     def generate_layer(i):
-        layerd = np.array([[Cube(Type.WALL if data[row][col] >= i * cube_h + minheight else Type.AIR, (row, col, i),
-                                 (cube_h, cube_h, cube_h), random.random(), wall_velocity
+        layerd = np.array([[Cube(Type.WALL if data[row][col] >= i * cube_h + minheight else Type.AIR,
+                                 (row, col, i),
+                                 (cube_h, cube_h, cube_h), 0.0, wall_velocity
                                  if data[row][col] >= i * cube_h + minheight else air_velocity, 0)
                             for col in range(len(data[row]))] for row in range(len(data))])
         # calculating nextToIterate
@@ -34,12 +36,17 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
             threads[-1].start()
     for _i in range(n_layers):
             threads[_i].join()
-    # for i in range(n_HorizontalCubes):
-    #     for layerd in layers[i].cells:
-    #         for row in layerd:
-    #             for elem in row:
-    #                 elem.
+
     print(layers)
+
+    streetmap = toArray()
+    for y in range(len(layers[0].cells)):
+        for x in range(len(layers[0].cells[y])):
+            if streetmap[y][x] != 0:
+                for z in range(len(layers)):
+                    if layers[z].cells[y][x].type == Type.AIR:
+                        layers[z].cells[y][x].isStreet = True
+                        break
 
     for z in range(len(layers)):
         for y in range(len(layers[z].cells)):

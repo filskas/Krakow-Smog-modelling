@@ -45,17 +45,20 @@ class Layer:
             iter = self.cells[z][0]
             while iter is not None:
                 #TODO : iter.update
-                iter.update()
+                iter.updated = False
                 iter = iter.nextAir
-        print("sum of pollution on layer:",self.y_bottom," ",self.pollutionSum())
 
-    def applyUpdate(self):
         for z in range(len(self.cells)):
             iter = self.cells[z][0]
             while iter is not None:
-                # TODO : iter.applyUpdate
-                iter.apply_update()
+                #TODO : iter.update
+                if iter.updated == False:
+                    iter.update()
+                    iter.updated = True
                 iter = iter.nextAir
+
+        print("sum of pollution on layer:",self.y_bottom," ",self.pollutionSum())
+
 
     def getPixelsToArray(self,x_bl,z_bl,x_tr,z_tr,out_arr,ind):
         out_arr[ind] = self.getPixels(x_bl, z_bl, x_tr, z_tr)
