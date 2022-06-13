@@ -11,7 +11,7 @@ def Update(map):
         threads[-1].start()
     for _i in range(n_layers):
         threads[_i].join()
-
+    """
     threads =[]
     for _i in range(n_layers):
             threads.append(
@@ -20,3 +20,4 @@ def Update(map):
     for _i in range(n_layers):
             threads[_i].join()
         # print(pxls[_i])
+    """
