@@ -7,6 +7,7 @@ generalMap = []
 #isDrawingBlocker = False
 window_size = (500, 500)
 n_layers = 5
+
 gif_create=True
 gif_path= None
 

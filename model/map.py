@@ -52,8 +52,8 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
         for y in range(len(layers[z].cells)):
             for x in range(len(layers[z].cells[y])):
                 for rel in relative_neighbors:
-                    if not( n_HorizontalCubes>z+rel[2]>=0 and len(layers[z].cells)>y+rel[1]>=0 and len(layers[z].cells[y])>x+rel[0]>=0):
-                        layers[z].cells[y][x].type = Type.WALL
+                    if not( len(layers[z].cells)>y+rel[1]>=0 and len(layers[z].cells[y])>x+rel[0]>=0):
+                        layers[z].cells[y][x].is_boarder_pollution_source = True
 
     for z in range(len(layers)):
         for y in range(len(layers[z].cells)):
