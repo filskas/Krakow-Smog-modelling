@@ -15,7 +15,7 @@ class Cube:
     DIFFUSION_COEFFICIENT = 0.4
     WIND_FACTOR = 1
     THRESHOLDS = (0, 0.1, 0.3, 0.6, 0.9, 1)
-    GRAVITY = 1.05
+    GRAVITY = 0.5
 
     def __init__(self, type, coordinates, size, pollution_rate, velocity, pressure):
         self._type = type
@@ -124,7 +124,7 @@ class Cube:
 
     def transfer_coefficient_of_pollutant_from_neighbor(self, neighbor):
         if self.neighbors[neighbor] == (0, 0, -1):
-            return self.GRAVITY * self.WIND_FACTOR * neighbor.velocity.velocities[reverse_direction(self.neighbors[neighbor])] \
+            return self.GRAVITY + self.WIND_FACTOR * neighbor.velocity.velocities[reverse_direction(self.neighbors[neighbor])] \
                    + self.DIFFUSION_COEFFICIENT
         return self.WIND_FACTOR * neighbor.velocity.velocities[reverse_direction(self.neighbors[neighbor])] \
                + self.DIFFUSION_COEFFICIENT
