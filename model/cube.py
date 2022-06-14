@@ -2,6 +2,7 @@ from numpy import sign
 from model.type import Type
 from model.velocity import Velocity, other_axes
 from random import random
+from random import shuffle
 
 
 def reverse_direction(direction):
@@ -14,6 +15,7 @@ class Cube:
     DIFFUSION_COEFFICIENT = 0.4
     WIND_FACTOR = 1
     THRESHOLDS = (0, 0.1, 0.3, 0.6, 0.9, 1)
+    GRAVITY = 1.05
 
     def __init__(self, type, coordinates, size, pollution_rate, velocity, pressure):
         self._type = type
@@ -27,6 +29,7 @@ class Cube:
         self._nextAir = None
         self._isStreet = False
         self._updated = False
+        self.pollute_rate = None
 
     @property
     def nextAir(self):
@@ -91,7 +94,12 @@ class Cube:
     def update(self):
         if self.type == Type.AIR:
             self.pollute()
-            for neighbor in self.neighbors.keys():
+            # previous version
+            # for neighbor in self.neighbors.keys():
+            #     self.interact_with_neighbor(neighbor)
+            list_of_keys = list(self.neighbors.keys())
+            shuffle(list_of_keys)
+            for neighbor in list_of_keys:
                 self.interact_with_neighbor(neighbor)
 
     def interact_with_neighbor(self, neighbor):
@@ -115,6 +123,9 @@ class Cube:
                                * (neighbor.pollution_rate - self.pollution_rate)
 
     def transfer_coefficient_of_pollutant_from_neighbor(self, neighbor):
+        if self.neighbors[neighbor] == (0, 0, -1):
+            return self.GRAVITY * self.WIND_FACTOR * neighbor.velocity.velocities[reverse_direction(self.neighbors[neighbor])] \
+                   + self.DIFFUSION_COEFFICIENT
         return self.WIND_FACTOR * neighbor.velocity.velocities[reverse_direction(self.neighbors[neighbor])] \
                + self.DIFFUSION_COEFFICIENT
 
@@ -145,7 +156,7 @@ class Cube:
             polluting = random()
             if polluting < 0.2:
                 self.pollution_rate += polluting
-                self.pollute_rate = min(self.pollution_rate,1.0)
-                self.velocity.velocities[(0,0,1)] += 0.001
+                self.pollute_rate = min(self.pollution_rate, 1.0)
+                self.velocity.velocities[(0, 0, 1)] += 0.001
 
 
