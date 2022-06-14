@@ -12,7 +12,7 @@ WALL_COLOR=[1,1,1,255]
 
 class Cube:
     NUMBER_OF_DIMENSIONS = 3
-    DIFFUSION_COEFFICIENT = 0.4
+    DIFFUSION_COEFFICIENT = 0.01
     WIND_FACTOR = 1
     THRESHOLDS = (0, 0.1, 0.3, 0.6, 0.9, 1)
     GRAVITY = 0.5
@@ -30,6 +30,7 @@ class Cube:
         self._isStreet = False
         self._updated = False
         self.pollute_rate = None
+        self.is_boarder_pollution_source = False
 
     @property
     def nextAir(self):
@@ -102,6 +103,9 @@ class Cube:
             for neighbor in list_of_keys:
                 self.interact_with_neighbor(neighbor)
 
+            if self.is_boarder_pollution_source:
+                self.pollution_rate = 0
+
     def interact_with_neighbor(self, neighbor):
         if neighbor.type in (Type.WALL, Type.GROUND):
             self.spread(neighbor)
@@ -158,5 +162,15 @@ class Cube:
                 self.pollution_rate += polluting
                 self.pollute_rate = min(self.pollution_rate, 1.0)
                 self.velocity.velocities[(0, 0, 1)] += 0.001
+
+        elif self.is_boarder_pollution_source:
+            polluting = random()
+            if polluting < 0.2:
+                self.pollution_rate += polluting
+                self.pollute_rate = min(self.pollution_rate, 1.0)
+                # directions = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)]
+                # for direction in directions:
+                #     if direction not in self.neighbors.values():
+                #         self.velocity.velocities[direction] += 0.001
 
 
