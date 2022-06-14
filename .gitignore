@@ -3,7 +3,7 @@ gif_gen/gifs/*
 __pycache__/
 *.py[cod]
 *$py.class
-.idea   
+.idea
 # C extensions
 *.so
 

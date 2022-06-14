@@ -8,7 +8,11 @@ import model.SETTINGS
 
 
 def gifMain():
+
     rootPath,program =  os.path.split(os.path.realpath(__file__))
+    if not isdir(rootPath+"\\gifs"):
+        os.mkdir(rootPath+"\\gifs")
+
     path = rootPath+"\\gifs\\"+str(random.randint(1,10000))
     while isdir(path):
         path = str(random.randint(1, 10000))
