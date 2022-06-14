@@ -37,7 +37,7 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
     for _i in range(n_layers):
             threads[_i].join()
 
-    print(layers)
+    #print(layers)
 
     streetmap = toArray()
     for y in range(len(layers[0].cells)):
