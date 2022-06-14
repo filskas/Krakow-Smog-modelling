@@ -21,6 +21,7 @@ from model.layer import Layer
 from model.update import Update
 from utils import *
 from model.SETTINGS import *
+from poll_observe import *
 
 
 def gui():
@@ -98,6 +99,8 @@ def gui():
             redraw()
 
     def update():
+        if observing:
+            observe()
         Update(generalMap)
         nonlocal iteration
         iteration += 1
@@ -105,7 +108,13 @@ def gui():
     root = tk.Tk()
     root.wm_title("tytul")
     fig = plt.Figure(figsize=(5, 5), dpi=100)
-    _fr =np.uint8(    generalMap[cur_layer].getPixels(x, z, x + width, z + height))
+    _fr =   generalMap[cur_layer].getPixels(x, z, x + width, z + height)
+
+    if observing and draw_observers:
+        drawObservers(_fr)
+
+    _fr = np.uint8(_fr)
+
     printIfDBG(("   framesstart", type(_fr), _fr.shape), TIMEPRINT)
     image = fig.figimage( Image.fromarray(_fr, mode="RGBA"))
 
@@ -139,6 +148,9 @@ def gui():
 
             for _i in range(cur_layer):
                 printIfDBG(("   gotPixels", timeCheck()), TIMEPRINT)
+                if observing and draw_observers:
+                    drawObservers(frames[_i])
+
                 frames[_i] = np.uint8(frames[_i])
                 printIfDBG(("   uinted", timeCheck()), TIMEPRINT)
                 printIfDBG(("   frames", type(frames[_i]), frames[_i].shape), TIMEPRINT)
@@ -152,6 +164,8 @@ def gui():
             _i = cur_layer
             generalMap[_i].getPixelsToArray(x, z, x + width, z + height, frames, _i, moved)
             printIfDBG(("   gotPixels", timeCheck()), TIMEPRINT)
+            if observing and draw_observers:
+                drawObservers(frames[_i])
             frames[_i] = np.uint8(frames[_i])
             printIfDBG(("   uinted", timeCheck()), TIMEPRINT)
             image = Image.fromarray(frames[_i], mode="RGBA")
@@ -204,6 +218,8 @@ def load():
 
 
 def run():
+    if observing:
+        observeInit()
     if gif_create:
         global gif_path
         gif_path = gif_gen.gif_main.gifMain()

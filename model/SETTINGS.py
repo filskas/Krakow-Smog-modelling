@@ -18,3 +18,10 @@ multiple_layers_draw = True
 TIMEPRINT = True
 
 #MODE
+#??
+
+#POLLUTION
+observing= False
+draw_observers =False
+pollution_observers = [(250,400)]
+observe_dir = None
