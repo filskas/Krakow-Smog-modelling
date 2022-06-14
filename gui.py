@@ -144,7 +144,8 @@ def gui():
                 printIfDBG(("   frames", type(frames[_i]), frames[_i].shape), TIMEPRINT)
                 image = Image.fromarray(frames[_i], mode="RGBA")
                 printIfDBG(("   imaged", timeCheck()), TIMEPRINT)
-                image.save(gif_path+"\\"+str(_i)+"\\"+str(iteration)+".png")
+                if gif_create:
+                    image.save(gif_path+"\\"+str(_i)+"\\"+str(iteration)+".png")
                 fig.figimage(image, alpha=0.5)
                 print("drawed")
         else:
@@ -155,10 +156,12 @@ def gui():
             printIfDBG(("   uinted", timeCheck()), TIMEPRINT)
             image = Image.fromarray(frames[_i], mode="RGBA")
             printIfDBG(("   imaged", timeCheck()), TIMEPRINT)
+
             fig.figimage(image)
             printIfDBG(("   drawed", timeCheck()), TIMEPRINT)
 
-        fig.savefig(gif_path + "\\full\\" + str(iteration) + ".png")
+        if gif_create:
+            fig.savefig(gif_path + "\\full\\" + str(iteration) + ".png")
         printIfDBG(("   drawed", timeCheck()), TIMEPRINT)
         printIfDBG( ("frames shape:", frames.shape ), TIMEPRINT)
         canvas.draw()
