@@ -38,7 +38,7 @@ def gui():
     x, z = 0, 0
 
     height,width = window_size
-    frames = [[[WALL_COLOR for x in range(width)] for z in range(height)] for _ in range(n_layers)]
+    frames = [[[WALL_COLOR for x in range(width+1)] for z in range(height+1)] for _ in range(n_layers)]
     frames = np.uint8(frames)
     frames = np.array(frames)
 
