@@ -16,7 +16,7 @@ def printIfDBG(msg,dbg):
 
 
 def isWithin(coord, rbl, rtr):
-    x, y, z = coord
+    y,x, z = coord
     return rtr[0] > x >= rbl[0] and rtr[1] > y >= rbl[1]
 
 def coordinates_within_bounds(point, bound1, bound2, bound3):

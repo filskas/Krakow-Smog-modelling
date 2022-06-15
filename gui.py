@@ -1,4 +1,10 @@
 import tkinter as tk
+import sys
+from PyQt5.QtWidgets import QApplication
+app = QApplication(sys.argv)
+screen = app.screens()[0]
+#dpi = screen.physicalDotsPerInch()
+dpi=100
 # from pyglet.window import key
 import random
 import numpy as np
@@ -31,7 +37,7 @@ def gui():
 
     x, z = 0, 0
 
-    height, width = window_size
+    height,width = window_size
     frames = [[[WALL_COLOR for x in range(width)] for z in range(height)] for _ in range(n_layers)]
     frames = np.uint8(frames)
     frames = np.array(frames)
@@ -106,8 +112,10 @@ def gui():
         iteration += 1
 
     root = tk.Tk()
-    root.wm_title("tytul")
-    fig = plt.Figure(figsize=(5, 5), dpi=100)
+    root.wm_title("cracow smoker")
+    fig = plt.Figure(figsize=(float(width/(dpi*1.15)),float(height/(dpi*1.15))), dpi=dpi)
+    #fig.patch.set_facecolor('xkcd:mint green')
+    print(fig.get_figwidth(),fig.get_figheight())
     _fr =   generalMap[cur_layer].getPixels(x, z, x + width, z + height)
 
     if observing and draw_observers:
@@ -157,7 +165,9 @@ def gui():
                 image = Image.fromarray(frames[_i], mode="RGBA")
                 printIfDBG(("   imaged", timeCheck()), TIMEPRINT)
                 if gif_create:
-                    image.save(gif_path+"\\"+str(_i)+"\\"+str(iteration)+".png")
+                    _pth = gif_path + "\\" + str(_i) + "\\" + str(iteration) + ".png"
+                    image.save(_pth)
+                    printIfDBG(("saved img",_pth ),TIMEPRINT)
                 fig.figimage(image, alpha=0.5)
                 print("drawed")
         else:
@@ -183,8 +193,8 @@ def gui():
         moved = False
 
     # pack_toolbar=False will make it easier to use a layout manager later on.
-    toolbar = NavigationToolbar2Tk(canvas, root, pack_toolbar=False)
-    toolbar.update()
+    #toolbar = NavigationToolbar2Tk(canvas, root, pack_toolbar=False)
+    #toolbar.update()
     k_handlers = []
     k_handlers.append(canvas.mpl_connect(
         "key_press_event", handle_keys
@@ -194,7 +204,7 @@ def gui():
 
     button_quit.pack(side=tk.BOTTOM)
     # slider_update.pack(side=tk.BOTTOM)
-    toolbar.pack(side=tk.BOTTOM, fill=tk.X)
+    #toolbar.pack(side=tk.BOTTOM, fill=tk.X)
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
     tk.mainloop()

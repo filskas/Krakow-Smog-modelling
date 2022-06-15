@@ -11,14 +11,14 @@ street_generation_rate = 0.15
 street_generation_diff = 20
 generalMap = []
 isDrawingBlocker = False
-window_size = (500, 500)
+window_size = (719, 555)
 n_layers = 6
 
 gif_create=True
 gif_path= None
 
 #DRAWING
-multiple_layers_draw = False
+multiple_layers_draw = True
 drawing_precision = 10
 
 #DEBUG

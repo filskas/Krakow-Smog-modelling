@@ -13,6 +13,7 @@ def createMap(data, minheight, maxheight, n_HorizontalCubes):
     relative_neighbors = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
 
     def generate_layer(i):
+        #print("data len", len(data), " data[0] len",len(data[i]))
         layerd = np.array([[Cube(Type.WALL if data[row][col] >= i * cube_h + minheight else Type.AIR,
                                  (row, col, i),
                                  (cube_h, cube_h, cube_h), 0.0, Velocity(*wall_velocity)
