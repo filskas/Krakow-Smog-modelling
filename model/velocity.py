@@ -1,3 +1,4 @@
+
 def other_axes(unit_vector):
     if unit_vector[0] != 0:
         return [(0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
