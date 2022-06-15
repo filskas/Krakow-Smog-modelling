@@ -3,6 +3,8 @@ from model.cube import WALL_COLOR
 from utils import isWithin
 from utils import timeCheck
 import model.type
+from model.SETTINGS import wind
+from model.SETTINGS import wind_directions
 
 class Layer:
     def __init__(self, y_bottom, h, cells):
@@ -57,8 +59,14 @@ class Layer:
                     iter.updated = True
                 iter = iter.nextAir
 
-        print("updated layer with y_bottom=",self.y_bottom)
-        #print("sum of pollution on layer:",self.y_bottom," ",self.pollutionSum())
+        for z in range(len(self.cells)):
+            iter = self.cells[z][0]
+            while iter is not None:
+                for i in range(len(wind_directions)):
+                    iter.updateWind(wind_directions[i],wind[i]*(z/(len(self.cells)-1)))
+                iter = iter.nextAir
+
+        print("sum of pollution on layer:",self.y_bottom," ",self.pollutionSum())
 
 
     def initArray(self,arr,ind):

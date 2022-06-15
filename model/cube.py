@@ -3,7 +3,11 @@ from model.type import Type
 from model.velocity import Velocity, other_axes
 from random import random
 from random import shuffle
-
+from model.SETTINGS import wind
+from model.SETTINGS import car_vertical_blast
+from model.SETTINGS import street_generation_rate
+from model.SETTINGS import drawing_precision
+from model.SETTINGS import street_generation_diff
 
 def reverse_direction(direction):
     return tuple((-element for element in direction))
@@ -12,8 +16,8 @@ WALL_COLOR=[1,1,1,255]
 
 class Cube:
     NUMBER_OF_DIMENSIONS = 3
-    DIFFUSION_COEFFICIENT = 0.01
-    WIND_FACTOR = 1
+    DIFFUSION_COEFFICIENT = 0.05
+    WIND_FACTOR = 1.2 #was 1
     THRESHOLDS = (0, 0.1, 0.3, 0.6, 0.9, 1)
     GRAVITY = 0.5
 
@@ -25,12 +29,14 @@ class Cube:
         # self.new_pollution_rate = 0
         self._velocity = velocity
         self.neighbors = dict()
+        self.neighborsFromDirection = dict()
         self.pressure = pressure
         self._nextAir = None
         self._isStreet = False
         self._updated = False
-        self.pollute_rate = None
-        self.is_boarder_pollution_source = False
+        self._isBorder = False
+
+        self._clock = 11
 
     @property
     def nextAir(self):
@@ -85,6 +91,7 @@ class Cube:
 
     def add_neighbor(self, neighbor, relative_coordinates):
         self.neighbors[neighbor] = relative_coordinates
+        self.neighborsFromDirection[relative_coordinates] = neighbor
 
     # def bounce_off(self, neighbor):
     #     if neighbor.type in (Type.WALL, Type.GROUND):
@@ -93,18 +100,19 @@ class Cube:
     #                 self.velocity[i] *= -1
 
     def update(self):
+        self._clock += 1
+        self._clock = self._clock % 24
         if self.type == Type.AIR:
             self.pollute()
-            # previous version
             # for neighbor in self.neighbors.keys():
             #     self.interact_with_neighbor(neighbor)
             list_of_keys = list(self.neighbors.keys())
             shuffle(list_of_keys)
             for neighbor in list_of_keys:
                 self.interact_with_neighbor(neighbor)
+            if self.pollution_rate < 0: self.pollution_rate = 0
+            if self.pollution_rate > 1: self.pollution_rate = 1
 
-            if self.is_boarder_pollution_source:
-                self.pollution_rate = 0
 
     def interact_with_neighbor(self, neighbor):
         if neighbor.type in (Type.WALL, Type.GROUND):
@@ -115,6 +123,13 @@ class Cube:
     # might be too slow (one move is spread and the next is impacting the other cells)
     def spread(self, neighbor):
         if neighbor.type in (Type.WALL, Type.GROUND):
+            if neighbor.isBorder:
+                for v in other_axes(self.neighbors[neighbor]):
+                    updated = {v: 0}
+                    self.velocity.velocities.update(updated)
+                self.velocity.velocities.update({self.neighbors[neighbor]: 0})
+                self.pollution_rate = 0
+                return
             velocity = self.velocity.velocities[self.neighbors[neighbor]]
             velocity_part = velocity // 4
             for v in other_axes(self.neighbors[neighbor]):
@@ -123,11 +138,20 @@ class Cube:
             self.velocity.velocities.update({self.neighbors[neighbor]: 0})
 
     def update_from_neighbor(self, neighbor):
-        self.pollution_rate += self.transfer_coefficient_of_pollutant_from_neighbor(neighbor) \
+        if self.neighborsFromDirection[self.neighbors[neighbor]].isBorder:
+            self.pollution_rate = 0
+            print("happened")
+            return
+
+        change = self.transfer_coefficient_of_pollutant_from_neighbor(neighbor) \
                                * (neighbor.pollution_rate - self.pollution_rate)
+        self.pollution_rate += change
+        # neighbor.pollution_rate -= change
+        self.neighborsFromDirection[self.neighbors[neighbor]].pollution_rate -= change
+        # self.neighbors[neighbor].pollution_rate -= change
 
     def transfer_coefficient_of_pollutant_from_neighbor(self, neighbor):
-        if self.neighbors[neighbor] == (0, 0, -1):
+        if self.neighbors[neighbor] == (0, 0, 1):
             return self.GRAVITY + self.WIND_FACTOR * neighbor.velocity.velocities[reverse_direction(self.neighbors[neighbor])] \
                    + self.DIFFUSION_COEFFICIENT
         return self.WIND_FACTOR * neighbor.velocity.velocities[reverse_direction(self.neighbors[neighbor])] \
@@ -145,7 +169,7 @@ class Cube:
         # elif self.isStreet == True:
         #     return [0,0,255,255]
         else:
-            return [255, 0, 0, min(self.pollution_rate * 255 * 10,255)]
+            return [255, 0, 0, min(self.pollution_rate * 255 * drawing_precision,255)]
 
     @property
     def isStreet(self):
@@ -158,19 +182,25 @@ class Cube:
     def pollute(self):
         if self._isStreet:
             polluting = random()
-            if polluting < 0.2:
-                self.pollution_rate += polluting
-                self.pollute_rate = min(self.pollution_rate, 1.0)
-                self.velocity.velocities[(0, 0, 1)] += 0.001
+            if polluting < street_generation_rate:
+                if self._clock > 12:
+                    self.pollution_rate += polluting/street_generation_diff
+                else:
+                    self.pollution_rate += polluting
+                self.pollute_rate = min(self.pollution_rate,1.0)
+                # self.velocity.velocities[(0,0,1)] += car_vertical_blast
+                v = self.velocity.velocities[(0,0,1)] + car_vertical_blast
+                self.velocity.velocities.update({(0,0,1): v})
 
-        elif self.is_boarder_pollution_source:
-            polluting = random()
-            if polluting < 0.2:
-                self.pollution_rate += polluting
-                self.pollute_rate = min(self.pollution_rate, 1.0)
-                # directions = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)]
-                # for direction in directions:
-                #     if direction not in self.neighbors.values():
-                #         self.velocity.velocities[direction] += 0.001
+    @property
+    def isBorder(self):
+        return self._isBorder
 
+    @isBorder.setter
+    def isBorder(self, value):
+        self._isBorder = value
 
+    def updateWind(self,coord,value):
+        if self.velocity.velocities[coord] < value:
+            v = self.velocity.velocities[coord] + random() / 2
+            self.velocity.velocities.update({(coord): v})
