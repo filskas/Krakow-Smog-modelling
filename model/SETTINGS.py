@@ -1,5 +1,3 @@
-from model.velocity import Velocity
-
 wind = [1]
 wind_directions = [(0,1,0)]
 air_velocity = 0, wind[0], 0, 0, 0.5, 0

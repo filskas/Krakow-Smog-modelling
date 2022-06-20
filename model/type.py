@@ -8,4 +8,4 @@ class Type(Enum):
 
     @classmethod
     def list(cls):
-        return [element.name for element in Type]
+        return [t for t in Type]

@@ -26,7 +26,6 @@ class Cube:
         self._coordinates = coordinates
         self._size = size
         self.pollution_rate = pollution_rate
-        # self.new_pollution_rate = 0
         self._velocity = velocity
         self.neighbors = dict()
         self.neighborsFromDirection = dict()
@@ -35,7 +34,7 @@ class Cube:
         self._isStreet = False
         self._updated = False
         self._isBorder = False
-
+        self.pollute_rate = None
         self._clock = 11
 
     @property
@@ -93,26 +92,17 @@ class Cube:
         self.neighbors[neighbor] = relative_coordinates
         self.neighborsFromDirection[relative_coordinates] = neighbor
 
-    # def bounce_off(self, neighbor):
-    #     if neighbor.type in (Type.WALL, Type.GROUND):
-    #         for i in range(self.NUMBER_OF_DIMENSIONS):
-    #             if sign(neighbor.coordinates[i] - self.coordinates[i]) == sign(self.velocity[i]):
-    #                 self.velocity[i] *= -1
-
     def update(self):
         self._clock += 1
         self._clock = self._clock % 24
         if self.type == Type.AIR:
             self.pollute()
-            # for neighbor in self.neighbors.keys():
-            #     self.interact_with_neighbor(neighbor)
             list_of_keys = list(self.neighbors.keys())
             shuffle(list_of_keys)
             for neighbor in list_of_keys:
                 self.interact_with_neighbor(neighbor)
             if self.pollution_rate < 0: self.pollution_rate = 0
             if self.pollution_rate > 1: self.pollution_rate = 1
-
 
     def interact_with_neighbor(self, neighbor):
         if neighbor.type in (Type.WALL, Type.GROUND):
@@ -140,15 +130,12 @@ class Cube:
     def update_from_neighbor(self, neighbor):
         if self.neighborsFromDirection[self.neighbors[neighbor]].isBorder:
             self.pollution_rate = 0
-            print("happened")
             return
 
         change = self.transfer_coefficient_of_pollutant_from_neighbor(neighbor) \
                                * (neighbor.pollution_rate - self.pollution_rate)
         self.pollution_rate += change
-        # neighbor.pollution_rate -= change
         self.neighborsFromDirection[self.neighbors[neighbor]].pollution_rate -= change
-        # self.neighbors[neighbor].pollution_rate -= change
 
     def transfer_coefficient_of_pollutant_from_neighbor(self, neighbor):
         if self.neighbors[neighbor] == (0, 0, 1):
@@ -188,7 +175,6 @@ class Cube:
                 else:
                     self.pollution_rate += polluting
                 self.pollute_rate = min(self.pollution_rate,1.0)
-                # self.velocity.velocities[(0,0,1)] += car_vertical_blast
                 v = self.velocity.velocities[(0,0,1)] + car_vertical_blast
                 self.velocity.velocities.update({(0,0,1): v})
 

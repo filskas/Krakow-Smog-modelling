@@ -105,7 +105,6 @@ def gui():
     root.wm_title("cracow smoker")
     fig = plt.Figure(figsize=(float(width / (dpi * 1.15)), float(height / (dpi * 1.15))),
                      dpi=dpi)  # no idea why its not fullwindow image with just *1, but somehow 1.15 gave the best results
-    # fig.patch.set_facecolor('xkcd:mint green')
     print(fig.get_figwidth(), fig.get_figheight())
     _fr = generalMap[cur_layer].getPixels(x, z, x + width, z + height)
 
@@ -198,8 +197,6 @@ def gui():
     button_quit = tk.Button(master=root, text="Quit", command=root.quit)
 
     button_quit.pack(side=tk.BOTTOM)
-    # slider_update.pack(side=tk.BOTTOM)
-    # toolbar.pack(side=tk.BOTTOM, fill=tk.X)
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
     tk.mainloop()
